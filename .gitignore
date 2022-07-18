@@ -1,0 +1,3 @@
+venv/
+vars.json
+__pycache__/

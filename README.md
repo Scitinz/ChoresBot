@@ -1,2 +1,6 @@
 # ChoresBot
- Simple bot for tracking chores in a small house.
+    ChoresBot
+
+    THIS BOT IS NOT DESIGNED TO WORK ON MULTIPLE SERVERS AT ONCE.
+
+    Your python instance should contain each of the required modules in requirements.txt
