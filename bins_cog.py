@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 
-import bin
+import bin_data_fetch
 
 from datetime import datetime, timedelta
 
@@ -16,28 +16,11 @@ class ChoreBotCog(commands.Cog):
         self.lastbincollect = None
         self.binsout = False
 
-    #Shutdown command
-    @commands.command()
-    async def stop(self, ctx):
-        print("Shutting down...")
-        await self.bot.close()
-        exit()
-
-    @commands.command()
-    async def hello(self, ctx):
-        print("Hello command used")
-        await ctx.send("Hello!")
-
-    @commands.command()
-    async def beans(self, ctx):
-        print("Beans command used")
-        await ctx.send("on toast")
-
     #Get the next collection and send it in the channel that invoked the command
     @commands.command()
     async def nextcollection(self, ctx): 
         print("Next collection command used")
-        await ctx.send(bin.getnextcollection())
+        await ctx.send(bin_data_fetch.getnextcollection())
 
     #Start a bin rota in the channel that invoked this command
     @commands.command()
@@ -98,7 +81,7 @@ class ChoreBotCog(commands.Cog):
     @tasks.loop(hours=1)
     async def binrota(self):
         #Get next bin info
-        binfo = bin.getnextcollectioninfo()
+        binfo = bin_data_fetch.getnextcollectioninfo()
         #Convert this to a date time
         nextbintime = datetime.strptime(binfo['DATE'], '%A %d %B')
         nextbintime = nextbintime.replace(datetime.now().year)

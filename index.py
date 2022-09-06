@@ -2,7 +2,8 @@ import json
 import discord
 from discord.ext import commands
 from discord.ext import tasks
-import cogs
+import base_cog
+import bins_cog
 
 #Load metadata from JSON file
 with open("vars.json") as json_file:
@@ -26,21 +27,17 @@ class chores_bot(commands.Bot):
     async def on_ready(self):
         print('Logged in as {0.user}'.format(self))
 
-    #When we receive ping, send pong
+    #Default message handler
     async def on_message(self, message):
         if message.author.id == self.user.id:
             return #Don't reply to ourselves
 
         await self.process_commands(message)
 
-    #DM admin with any errors
-    async def dm_error(self, error):
-        admin_user = await self.fetch_user(self.admin_ID)
-        await admin_user.send(repr(error))
-
 intents = discord.Intents.default()
 intents.members = True
 bot = chores_bot(command_prefix=com_prefix, intents=intents, admin_ID=admin_ID)
-bot.load_extension("cogs")
+bot.load_extension("base_cog")
+bot.load_extension("bins_cog")
 #Run the client
 bot.run(token)
