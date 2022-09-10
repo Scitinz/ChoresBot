@@ -90,8 +90,7 @@ class ChoreBotCog(commands.Cog):
 
         #Five hours before this, make an @ (should be at roughly 7 o'clock at night, AKA 19:00)
         if now + timedelta(hours=4) < nextbintime and now + timedelta(hours=5) > nextbintime:
-            mention_str = "<@" + str(self.rota_members[self.member_turn_idx].id) + ">"
-            await self.rota_ctx.send(mention_str + " please take out the " + binfo['BINS'])
+            await self.rota_ctx.send(self.rota_members[self.member_turn_idx].mention + " please take out the " + binfo['BINS'])
             self.member_turn_idx = (self.member_turn_idx + 1) % len(self.rota_members)
             self.lastbincollecttime = nextbintime
             self.lastbincollect = binfo['BINS']
@@ -100,8 +99,7 @@ class ChoreBotCog(commands.Cog):
         if self.binsout:
             #Eleven hours after this, make an @ (should be at roughly 11 o'clock in the morning, AKA 11:00)
             if self.lastbincollecttime + timedelta(hours=11) < now and self.lastbincollecttime + timedelta(hours=12) > now:
-                mention_str = "<@" + str(self.rota_members[self.member_turn_idx].id) + ">"
-                await self.rota_ctx.send(mention_str + " please bring in the " + self.lastbincollect)
+                await self.rota_ctx.send(self.rota_members[self.member_turn_idx].mention + " please bring in the " + self.lastbincollect)
                 self.member_turn_idx = (self.member_turn_idx + 1) % len(self.rota_members)
                 self.binsout = False
 
