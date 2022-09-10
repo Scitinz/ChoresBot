@@ -110,5 +110,5 @@ class ChoreBotCog(commands.Cog):
     async def before_binrota(self):
         await self.rota_ctx.send("Started bin rota in this channel.")
 
-def setup(bot):
-    bot.add_cog(ChoreBotCog(bot))
+async def setup(bot):
+    await bot.add_cog(ChoreBotCog(bot))

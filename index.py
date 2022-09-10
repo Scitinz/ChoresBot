@@ -17,7 +17,7 @@ com_prefix = json_vars['COMMAND_PREFIX']
 admin_ID = json_vars['ADMIN_ID']
 
 #Establish a discord client class
-class chores_bot(commands.Bot):
+class ChoresBot(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.admin_ID = admin_ID
@@ -26,6 +26,9 @@ class chores_bot(commands.Bot):
     #Print when we're logged in
     async def on_ready(self):
         print('Logged in as {0.user}'.format(self))
+        await bot.load_extension("base_cog")
+        await bot.load_extension("bins_cog")
+        print("Loaded Extensions")
 
     #Default message handler
     async def on_message(self, message):
@@ -36,8 +39,7 @@ class chores_bot(commands.Bot):
 
 intents = discord.Intents.default()
 intents.members = True
-bot = chores_bot(command_prefix=com_prefix, intents=intents, admin_ID=admin_ID)
-bot.load_extension("base_cog")
-bot.load_extension("bins_cog")
+intents.message_content = True
+bot = ChoresBot(command_prefix=com_prefix, intents=intents, admin_ID=admin_ID)
 #Run the client
 bot.run(token)

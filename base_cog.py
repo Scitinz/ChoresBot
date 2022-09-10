@@ -19,5 +19,5 @@ class BaseCog(commands.Cog):
         print("Hello command used")
         await ctx.send("Hello!")
 
-def setup(bot):
-    bot.add_cog(BaseCog(bot))
+async def setup(bot):
+    await bot.add_cog(BaseCog(bot))
