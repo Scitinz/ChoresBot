@@ -2,8 +2,12 @@ import json
 import discord
 from discord.ext import commands
 from discord.ext import tasks
-import base_cog
-import bins_cog
+
+from watchdog.observers import Observer
+from watchdog.events import RegexMatchingEventHandler
+from threading import Thread
+import asyncio
+import os.path
 
 #Load metadata from JSON file
 with open("vars.json") as json_file:
@@ -13,8 +17,36 @@ with open("vars.json") as json_file:
 token = json_vars['DISCORD_BOT_TOKEN']
 #Set command prefix
 com_prefix = json_vars['COMMAND_PREFIX']
-#Get admin user ID
+#Set admin user ID
 admin_ID = json_vars['ADMIN_ID']
+
+#Class to enable live updates
+class ModuleUpdater(RegexMatchingEventHandler):
+    def __init__(self, bot):
+        super().__init__(regexes=".+\.py", ignore_directories=True, case_sensitive=True)
+        self.bot = bot
+
+    def on_modified(self, event):
+        file_path = event.src_path
+        filename = os.path.basename(file_path)
+        modulename = filename.split(".")[0]
+        #Only reload cogs
+        if "cog" in modulename:
+            print("Reloading " + modulename)
+            asyncio.run(self.bot.reload_extension(modulename))
+
+#Method for the daemon thread to run to handle code updates
+def ModuleUpdateHandler(bot):
+    event_handler = ModuleUpdater(bot)
+    observer = Observer()
+    observer.schedule(event_handler=event_handler, path=".", recursive=False)
+    observer.start()
+    try:
+        while observer.is_alive():
+            observer.join(1)
+    finally:
+        observer.stop()
+        observer.join()
 
 #Establish a discord client class
 class ChoresBot(commands.Bot):
@@ -23,11 +55,12 @@ class ChoresBot(commands.Bot):
         self.admin_ID = admin_ID
 
     ## Async methods
-    #Print when we're logged in
+    #Print when we're logged in, and load extensions
     async def on_ready(self):
         print('Logged in as {0.user}'.format(self))
-        await bot.load_extension("base_cog")
-        await bot.load_extension("bins_cog")
+        await self.load_extension("base_cog")
+        await self.load_extension("bins_cog")
+        await self.load_extension("test_cog")
         print("Loaded Extensions")
 
     #Default message handler
@@ -41,5 +74,10 @@ intents = discord.Intents.default()
 intents.members = True
 intents.message_content = True
 bot = ChoresBot(command_prefix=com_prefix, intents=intents, admin_ID=admin_ID)
+
+#Run the daemon thread
+updater = Thread(target=ModuleUpdateHandler, daemon=True, args=(bot,))
+updater.start()
+
 #Run the client
 bot.run(token)
