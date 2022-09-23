@@ -9,9 +9,15 @@ class BaseCog(commands.Cog):
     #Shutdown command
     @commands.command()
     async def stop(self, ctx):
-        print("Shutting down...")
-        await self.bot.close()
-        exit()
+        #Only shut down when the admin requests it
+        if (ctx.author.User.id == self.bot.admin_ID):
+            await ctx.send("Shutting down...")
+            print("Shutting down...")
+            await self.bot.close()
+            exit()
+        else:
+            await ctx.send("Your are not an admin, and so cannot invoke this command!")
+            print("Failed stop command use")
 
     #Hello command
     @commands.command()
