@@ -7,7 +7,7 @@ from watchdog.observers import Observer
 from watchdog.events import RegexMatchingEventHandler
 from threading import Thread
 import asyncio
-import os.path
+import os
 
 #Load metadata from JSON file
 with open("vars.json") as json_file:
@@ -26,6 +26,7 @@ class ModuleUpdater(RegexMatchingEventHandler):
         super().__init__(regexes=".+\.py", ignore_directories=True, case_sensitive=True)
         self.bot = bot
 
+    #Reload a cog that has been modified
     def on_modified(self, event):
         file_path = event.src_path
         filename = os.path.basename(file_path)
@@ -34,6 +35,16 @@ class ModuleUpdater(RegexMatchingEventHandler):
         if "cog" in modulename:
             print("Reloading " + modulename)
             asyncio.run(self.bot.reload_extension(modulename))
+
+    #Load a new cog that has been created
+    def on_created(self, event):
+        file_path = event.src_path
+        filename = os.path.basename(file_path)
+        modulename = filename.split(".")[0]
+        #Only load cogs
+        if "cog" in modulename:
+            print("Loading " + modulename)
+            asyncio.run(self.bot.load_extension(modulename))
 
 #Method for the daemon thread to run to handle code updates
 def ModuleUpdateHandler(bot):
@@ -58,9 +69,12 @@ class ChoresBot(commands.Bot):
     #Print when we're logged in, and load extensions
     async def on_ready(self):
         print('Logged in as {0.user}'.format(self))
-        await self.load_extension("base_cog")
-        await self.load_extension("bins_cog")
-        await self.load_extension("test_cog")
+        files = os.listdir()
+        #Load any file that is a cog
+        for file in files:
+            if "cog.py" in file:
+                name = file.split(".")[0]
+                await self.load_extension(name)
         print("Loaded Extensions")
 
     #Default message handler
